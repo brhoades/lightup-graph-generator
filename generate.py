@@ -4,17 +4,31 @@ from scipy import interpolate
 import pandas as pd
 import re
 import copy
+import sys
+            
 
-fn2 = "validityenforced-2-res.log"
-fn1 = "randomplace-2-res.log"
+fn = []
+#fn2 = "MOEA-probdist-0.861.txt"
+#fn1 = "MOEA-tournament-0.861.txt"
 dn = []
-dn.append( "Validity Enforced")
-dn.append( "Random" )
+#dn.append( "Tournament Selection")
+#dn.append( "Roulette Wheel Selection" )
 smfctr = 0.0003 #>0.0001 < 0.001 works best
 x_axis_label = "Fitness Evaluations"
 x_axis_ticks = 0 # 0 == auto
-y_axis_label = "Average Fitness Over 5 Runs"
-graph_label = "Provided Problem Initialization"
+y_axis_label = "" #if blank, set to "Average Subfitness Over # Runs"
+graph_label = "Easy Graph NSGA-II"
+
+args = sys.argv[1:]
+argument = re.compile('\-[A-Za-z]')
+for i in range(0, len(args), 2):
+    if argument.match(args[i]):
+        if sys.argv[i] == "-t":
+            graph_label = args[i+1]
+        continue
+    
+    fn.append(args[i])
+    dn.append(args[i+1])
 
 #to be automatically determined later
 st = 0
@@ -22,18 +36,18 @@ en = 0
 stp = 0
 
 log = []
-log.append( open( ''.join(["logs/", fn1]), 'r' ) )
-log.append( open( ''.join(["logs/", fn2]), 'r' ) )
+for file in fn:
+    log.append( open(file, 'r' ) )
 
 probs = []
 
 lrun = 0
 run = re.compile(r'Run [0-9]+')
-end = re.compile(r'Run best')
+end = re.compile(r'\=SPACER\=')
 thisrun = []
 thissim = []
 inrun = False
-for i in range(0,2):
+for i in range(0,len(log)):
     for line in log[i]:
         if end.match(line):
             inrun = False
@@ -86,6 +100,9 @@ for pri in range(len(probs)):
         
     bestdata.append(pd.DataFrame(da))
     avgdata.append(pd.DataFrame(db))  
+
+if y_axis_label == "":
+    y_axis_label = ''.join(['Average Subfitness Over ', len(probs[0][0]), ' Runs'])
    
 #grab our individual means and prepare to plot them
 for i in range(len(bestdata)):
