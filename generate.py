@@ -5,7 +5,6 @@ import pandas as pd
 import re
 import copy
 import sys
-            
 
 fn = []
 #fn2 = "MOEA-probdist-0.861.txt"
@@ -23,7 +22,7 @@ args = sys.argv[1:]
 argument = re.compile('\-[A-Za-z]')
 for i in range(0, len(args), 2):
     if argument.match(args[i]):
-        if sys.argv[i] == "-t":
+        if args[i] == "-t":
             graph_label = args[i+1]
         continue
     
@@ -58,7 +57,7 @@ for i in range(0,len(log)):
             continue
         if run.match(line):
             inrun = True
-            thisrun = [[], []]
+            thisrun = [[] for i in range(6)]
             continue
         if inrun:
             linel = line.split('\t')
@@ -68,8 +67,8 @@ for i in range(0,len(log)):
                 lrun = int(linel[0])
             elif stp == 0 and lrun != 0:
                 stp = int(linel[0])-lrun
-            thisrun[0].append( float(linel[1]) )    
-            thisrun[1].append( float( linel[2].rstrip('\n')) )
+            for i in range(6):
+                thisrun[i].append( float(linel[i+1]) )    
             lrun = int(linel[0])
     probs.append(copy.deepcopy(thissim))
     thissim = []
@@ -95,15 +94,18 @@ for pri in range(len(probs)):
     db = {}
     for i in range(len(probs[pri])):
         runname = ''.join(['run', str(i+1)])
-        da[runname] = pd.Series(probs[pri][i][1], index=index)
-        db[runname] = pd.Series(probs[pri][i][0], index=index)
+        for j in range(1,6,2):
+            da[''.join([runname, '.', str(j)])] = pd.Series(probs[pri][i][1], index=index)
+        for j in range(0,6,2):
+            db[''.join([runname, '.', str(j)])] = pd.Series(probs[pri][i][0], index=index)
         
     bestdata.append(pd.DataFrame(da))
     avgdata.append(pd.DataFrame(db))  
 
+#autogenerate our run count
 if y_axis_label == "":
-    y_axis_label = ''.join(['Average Subfitness Over ', len(probs[0][0]), ' Runs'])
-   
+    y_axis_label = ''.join(['Average Subfitness Over ', str(len(probs[0])), ' Runs'])
+
 #grab our individual means and prepare to plot them
 for i in range(len(bestdata)):
     bestdata[i]['mean'] = bestdata[i].mean(1)
@@ -135,4 +137,5 @@ fig.set_xlabel(x_axis_label)
 plt.title(graph_label)
 
 plt.grid( )
-plt.show(1)
+# plt.show(1)
+plt.savefig('out.png')
