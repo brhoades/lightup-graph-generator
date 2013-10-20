@@ -69,7 +69,10 @@ for i in range(0,len(log)):
             elif stp == 0 and lrun != 0:
                 stp = int(linel[0])-lrun
             for i in range(7):
-                thisrun[i].append( float(linel[i].rstrip('\n')) ) 
+                if i != 0:
+                    thisrun[i].append( float(linel[i].rstrip('\n')) ) 
+                else:
+                    thisrun[i].append( int(linel[i].rstrip('\n')) ) 
             lrun = int(linel[0])
     probs.append(copy.deepcopy(thissim))
     thissim = []
@@ -77,7 +80,7 @@ for i in range(0,len(log)):
 #Now that we have our step, start, and end initialize our index
 #index = [i for i in range(st,en,stp)]
 #and our interpolation index
-iindex = [i for i in range(st,en)]
+#iindex = [i for i in range(st,en)]
 
 if x_axis_ticks == 0:
     x_axis_ticks = int(en-stp/10)
@@ -91,10 +94,17 @@ avgdata = []
 # run (run1): [0][1]
 # 0 => average list [.3,.5] 1 => bestlist [0.2, 1]
 indicies = []
+maxindex = -1
+minindex = 1000000000000
 for pri in range(len(probs)):
     da = {}
     db = {}
-    indicies.append(probs[pri][0][0])
+    indicies.append(pd.Series(probs[pri][0][0], probs[pri][0][0]))
+    indexs = probs[pri][0][0]
+    if indexs[len(probs[pri][0][0])-1] > maxindex:
+        maxindex = indexs[len(probs[pri][0][0])-1]
+    if indexs[0] < minindex:
+        minindex = indexs[0]
     for i in range(len(probs[pri])):
         runname = ''.join(['run', str(i+1)])
         for j in range(2,7,2):
@@ -104,7 +114,6 @@ for pri in range(len(probs)):
         
     bestdata.append(pd.DataFrame(da))
     avgdata.append(pd.DataFrame(db))  
-    print(pd.DataFrame(db))
 #autogenerate our run count
 if y_axis_label == "":
     y_axis_label = ''.join(['Average Subfitness Over ', str(len(probs[0])), ' Runs'])
@@ -112,23 +121,28 @@ if y_axis_label == "":
 #grab our individual means and prepare to plot them
 for i in range(len(bestdata)):
     bestdata[i]['mean'] = bestdata[i].mean(1)
+    #add indecies after so we don't average them
     bestdata[i]['index'] = pd.Series(indicies[i], index=indicies[i])
 for i in range(len(avgdata)):
     avgdata[i]['mean'] = avgdata[i].mean(1)
+    #add indecies after so we don't average them
     avgdata[i]['index'] = pd.Series(indicies[i], index=indicies[i])
-    
+
 mdataframed = {}
+
+maxiindex = [j for j in range(minindex,maxindex)]
+print( minindex, maxindex)
 for i in range(len(bestdata)):
-    # print("\n", bestdata[i]['index'], "\n", bestdata[i]['mean'])
+    iindex = [j for j in range(bestdata[i]['index'].min(),bestdata[i]['index'].max())]
     s = interpolate.UnivariateSpline(bestdata[i]['index'], bestdata[i]['mean'], s=smfctr)
-    mdataframed[''.join([dn[i], ' Avg Best'])] = s(iindex)
+    mdataframed[''.join([dn[i], ' Avg Best'])] = pd.Series(s(iindex)).reindex(index=maxiindex)
                         
 #for i in range(len(avgdata)):
     #s = interpolate.UnivariateSpline(avgdata[i]['index'], avgdata[i]['mean'], s=smfctr)
     #mdataframed[''.join([dn[i], ' Average'])] = s(iindex)
                         
 #mdataframed['Fitness Evaluations'] = iindex
-mdataframe = pd.DataFrame(mdataframed, index=iindex)
+mdataframe = pd.DataFrame(mdataframed)
 
 colors = iter(cm.rainbow(np.linspace(0, 1, len(mdataframed))))
 print( colors )
