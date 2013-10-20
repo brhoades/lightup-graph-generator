@@ -77,11 +77,6 @@ for i in range(0,len(log)):
     probs.append(copy.deepcopy(thissim))
     thissim = []
 
-#Now that we have our step, start, and end initialize our index
-#index = [i for i in range(st,en,stp)]
-#and our interpolation index
-#iindex = [i for i in range(st,en)]
-
 if x_axis_ticks == 0:
     x_axis_ticks = int(en-stp/10)
 
@@ -131,7 +126,6 @@ for i in range(len(avgdata)):
 mdataframed = {}
 
 maxiindex = [j for j in range(minindex,maxindex)]
-print( minindex, maxindex)
 for i in range(len(bestdata)):
     iindex = [j for j in range(bestdata[i]['index'].min(),bestdata[i]['index'].max())]
     s = interpolate.UnivariateSpline(bestdata[i]['index'], bestdata[i]['mean'], s=smfctr)
@@ -141,13 +135,13 @@ for i in range(len(bestdata)):
     #s = interpolate.UnivariateSpline(avgdata[i]['index'], avgdata[i]['mean'], s=smfctr)
     #mdataframed[''.join([dn[i], ' Average'])] = s(iindex)
                         
-#mdataframed['Fitness Evaluations'] = iindex
+#mdataframed['Fitness Evaluations'] = maxiindex
 mdataframe = pd.DataFrame(mdataframed)
 
 colors = iter(cm.rainbow(np.linspace(0, 1, len(mdataframed))))
-print( colors )
+
 for subplot in mdataframe:
-    plt.plot(iindex, mdataframe[subplot], color=next(colors), label=subplot)
+    plt.plot(maxiindex, mdataframe[subplot], color=next(colors), label=subplot, antialiased=True, rasterized=True)
 plt.autoscale(axis='x', tight=True)
 #fig.set_xticks(np.arange(st,en-stp,x_axis_ticks))
 #fig.set_yticks(np.arange(0,1.,0.1))
@@ -158,5 +152,6 @@ plt.xlabel(x_axis_label)
 plt.title(graph_label)
 plt.legend(loc=3, borderaxespad=0.)
 plt.grid( )
-plt.show(1)
-#plt.savefig('out.png')
+#plt.show(1)
+#plt.savefig('rastered.pdf')
+plt.savefig('out.png', dpi=500)
