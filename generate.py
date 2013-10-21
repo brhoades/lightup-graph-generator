@@ -48,7 +48,6 @@ thisrun = []
 thissim = []
 inrun = False
 for i in range(0,len(log)):
-    print(log[i])
     for line in log[i]:
         if end.match(line):
             inrun = False
@@ -134,12 +133,11 @@ for i in range(len(bestdata)):
                         
 #mdataframed['Fitness Evaluations'] = maxiindex
 mdataframe = pd.DataFrame(mdataframed)
-
 colors = iter(cm.rainbow(np.linspace(0, 1, len(mdataframed))))
 
 for subplot in mdataframe:
-    plt.plot(maxiindex, mdataframe[subplot], color=next(colors), label=subplot, antialiased=True, rasterized=True)
-plt.autoscale(axis='x', tight=True)
+    plt.plot(maxiindex, mdataframe[subplot], color=next(colors), label=subplot, antialiased=True, rasterized=True, linewidth=2)
+#plt.autoscale(axis='x', tight=True)
 #fig.set_xticks(np.arange(st,en-stp,x_axis_ticks))
 #fig.set_yticks(np.arange(0,1.,0.1))
 
@@ -149,6 +147,5 @@ plt.xlabel(x_axis_label)
 plt.title(graph_label)
 plt.legend(loc=3, borderaxespad=0.)
 plt.grid( )
-#plt.show(1)
 #plt.savefig('rastered.pdf')
-plt.savefig('4.2.png', dpi=500)
+plt.savefig('4.1.png', dpi=500)
