@@ -48,6 +48,7 @@ thisrun = []
 thissim = []
 inrun = False
 for i in range(0,len(log)):
+    print(log[i])
     for line in log[i]:
         if end.match(line):
             inrun = False
@@ -63,16 +64,11 @@ for i in range(0,len(log)):
         if inrun:
             linel = line.split('\t')
             #if necessary, determine our step, start, and end
-            if st == 0:
-                st = int(linel[0])
-                lrun = int(linel[0])
-            elif stp == 0 and lrun != 0:
-                stp = int(linel[0])-lrun
-            for i in range(7):
-                if i != 0:
-                    thisrun[i].append( float(linel[i].rstrip('\n')) ) 
+            for j in range(7):
+                if j != 0:
+                    thisrun[j].append( float(linel[j].rstrip('\n')) ) 
                 else:
-                    thisrun[i].append( int(linel[i].rstrip('\n')) ) 
+                    thisrun[j].append( int(linel[j].rstrip('\n')) ) 
             lrun = int(linel[0])
     probs.append(copy.deepcopy(thissim))
     thissim = []
@@ -132,8 +128,9 @@ for i in range(len(bestdata)):
     mdataframed[''.join([dn[i], ' Avg Best'])] = pd.Series(s(iindex)).reindex(index=maxiindex)
                         
 #for i in range(len(avgdata)):
+    #iindex = [j for j in range(avgdata[i]['index'].min(),avgdata[i]['index'].max())]
     #s = interpolate.UnivariateSpline(avgdata[i]['index'], avgdata[i]['mean'], s=smfctr)
-    #mdataframed[''.join([dn[i], ' Average'])] = s(iindex)
+    #mdataframed[''.join([dn[i], ' Average'])] = pd.Series(s(iindex)).reindex(index=maxiindex)
                         
 #mdataframed['Fitness Evaluations'] = maxiindex
 mdataframe = pd.DataFrame(mdataframed)
@@ -154,4 +151,4 @@ plt.legend(loc=3, borderaxespad=0.)
 plt.grid( )
 #plt.show(1)
 #plt.savefig('rastered.pdf')
-plt.savefig('out.png', dpi=500)
+plt.savefig('4.2.png', dpi=500)
